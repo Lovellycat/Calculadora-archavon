@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archavon Cabana - Calculadora</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --card-bg: #fdf5e6; /* Creme antigo */
+            --accent: #8b0000; /* Vermelho escuro */
+            --text-dark: #2c2c2c;
+            --btn-color: #a0522d; /* Terracota */
+            --border-gold: #d4af37;
+        }
+
+        body { 
+            font-family: 'Georgia', serif; 
+            background-color: var(--bg-dark); 
+            background-image: url('https://www.transparenttextures.com/patterns/dark-leather.png');
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            perspective: 1000px;
+        }
+
+        /* Logo Centralizada */
+        .logo-container {
+            text-align: center;
+            margin-bottom: -20px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .logo-img {
+            width: 220px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 8px double var(--accent);
+            position: relative;
+        }
+
+        /* Sistema de Abas */
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: rgba(139, 0, 0, 0.1);
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--accent);
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 0.8em;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.4s; }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Inputs e Design */
+        .input-box {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .input-box img { width: 40px; margin-bottom: 10px; }
+
+        label { display: block; font-weight: bold; margin-bottom: 10px; color: var(--accent); letter-spacing: 1px; }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            border: 1px solid var(--accent);
+            background: white;
+            font-size: 1.2em;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        button.main-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--btn-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #5e2f1a;
+        }
+
+        button.main-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #5e2f1a; }
+
+        /* Resultados */
+        .results-area {
+            margin-top: 25px;
+            padding: 15px;
+            border: 2px dashed var(--accent);
+            background: #fff9f0;
+        }
+
+        .res-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: bold; }
+        .repasse-line { color: #d9534f; font-size: 1.1em; border-top: 1px solid #ddd; padding-top: 5px; }
+        .total-line { color: #2e7d32; font-size: 1.3em; }
+
+        .btn-pdf {
+            background: #444;
+            color: white;
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo-container">
+        <img src="logo.png" class="logo-img" alt="Logo">
+    </div>
+
+    <div class="card">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'venda')">Realizar Venda</button>
+            <button class="tab-btn" onclick="openTab(event, 'repasse')">Repasses</button>
+        </div>
+
+        <div id="venda" class="tab-content active">
+            <div class="input-box">
+                <label>ELIXIR DA SACIEDADE (R$ 90)</label>
+                <input type="number" id="qE" value="0" min="0">
+            </div>
+
+            <div class="input-box">
+                <label>ENSOPADO FORTIFICANTE (R$ 90)</label>
+                <input type="number" id="qS" value="0" min="0">
+            </div>
+
+            <button class="main-btn" onclick="processar()">Confirmar Venda</button>
+
+            <div id="resArea" class="results-area" style="display:none">
+                <div class="res-line"><span>Total Bruto:</span> <span id="rB">R$ 0</span></div>
+                <div class="res-line repasse-line"><span>Repasse (20%):</span> <span id="rR">R$ 0</span></div>
+                <div class="res-line total-line"><span>Total Líquido:</span> <span id="rL">R$ 0</span></div>
+                <button class="btn-pdf" onclick="gerarPDF()">📄 Gerar Comprovante PDF</button>
+            </div>
+        </div>
+
+        <div id="repasse" class="tab-content">
+            <div class="input-box">
+                <h3 style="color: var(--accent)">Regras de Repasse</h3>
+                <p>Todos os itens místico-alimentares possuem uma taxa de 20% sobre o valor bruto vendido.</p>
+                <p>O repasse deve ser entregue ao tesoureiro ao final de cada turno.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentData = {};
+
+    function openTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) tabcontent[i].classList.remove("active");
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) tablinks[i].classList.remove("active");
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    function processar() {
+        const val = 90;
+        const e = parseInt(document.getElementById('qE').value) || 0;
+        const s = parseInt(document.getElementById('qS').value) || 0;
+        
+        const bruto = (e + s) * val;
+        const rep = bruto * 0.20;
+        const liq = bruto - rep;
+
+        document.getElementById('rB').innerText = `R$ ${bruto}`;
+        document.getElementById('rR').innerText = `R$ ${rep}`;
+        document.getElementById('rL').innerText = `R$ ${liq}`;
+        document.getElementById('resArea').style.display = 'block';
+
+        currentData = { e, s, bruto, rep, liq };
+    }
+
+    function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFont("courier", "bold");
+        doc.text("REGISTRO DE VENDAS - ARCHAVON CABANA", 20, 20);
+        doc.line(20, 25, 190, 25);
+        
+        doc.setFont("courier", "normal");
+        doc.text(`Data: ${new Date().toLocaleString()}`, 20, 35);
+        doc.text(`---------------------------------------`, 20, 45);
+        doc.text(`ELIXIR SACIEDADE: ${currentData.e} un.`, 20, 55);
+        doc.text(`ENSOPADO FORTIF.: ${currentData.s} un.`, 20, 65);
+        doc.text(`---------------------------------------`, 20, 75);
+        
+        doc.text(`BRUTO TOTAL: R$ ${currentData.bruto}`, 20, 85);
+        doc.setTextColor(200, 0, 0);
+        doc.text(`REPASSE (20%): R$ ${currentData.rep}`, 20, 95);
+        
+        doc.setTextColor(0, 100, 0);
+        doc.text(`VALOR LÍQUIDO: R$ ${currentData.liq}`, 20, 110);
+        
+        doc.save(`recibo_${Date.now()}.pdf`);
+    }
+</script>
+
+</body>
+</html>

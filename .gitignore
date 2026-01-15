@@ -1,0 +1,15 @@
+# Arquivos de sistema (Windows/Mac)
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Pastas de editores (VS Code / Sublime)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Backups e logs
+*.log
+*.tmp
+*.bak
