@@ -3,112 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archavon Cabana - Sistema de Vendas</title>
+    <title>Archavon Cabana - Calculadora Profissional</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        :root {
-            --bg-body: #1a1a1a;
-            --card-main: #fcf9f2;
-            --accent-red: #8b0000;
-            --accent-brown: #a0522d;
-            --text-color: #333;
-            --border-color: #dcdcdc;
-        }
-
         body { 
             font-family: Arial, sans-serif; 
-            background-color: var(--bg-body); 
-            display: flex; justify-content: center; align-items: center;
+            background-color: #1a1a1a; 
+            display: flex; justify-content: center; align-items: center; 
             min-height: 100vh; margin: 0; padding: 20px;
         }
-
-        .container { width: 100%; max-width: 450px; text-align: center; }
-
-        .logo-img {
-            width: 220px; margin-bottom: -35px; position: relative; z-index: 5;
+        .container { width: 100%; max-width: 600px; text-align: center; }
+        .logo-img { 
+            width: 200px; margin-bottom: -30px; position: relative; z-index: 5;
             filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6));
         }
-
         .main-card {
-            background: var(--card-main); border-radius: 8px;
-            border: 2px solid var(--accent-red); padding: 45px 20px 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: #fcf9f2; border-radius: 12px; border: 2px solid #8b0000;
+            padding: 40px 20px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 15px;
         }
-
-        /* Abas */
-        .tabs { display: flex; margin-bottom: 20px; border-radius: 4px; overflow: hidden; border: 1px solid var(--accent-red); }
-        .tab-btn {
-            flex: 1; padding: 12px; border: none; background: #eee;
-            color: var(--accent-red); font-weight: bold; cursor: pointer;
-            text-transform: uppercase; font-family: Arial, sans-serif;
+        .tabs { display: flex; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+        .tab-btn { 
+            flex: 1; padding: 12px; border: none; cursor: pointer; font-weight: bold; 
+            text-transform: uppercase; font-family: Arial, sans-serif; background: #d2b48c; color: white;
         }
-        .tab-btn.active { background: var(--accent-red); color: white; }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* Blocos */
-        .item-row {
-            background: #fff; border: 1px solid var(--border-color);
-            border-radius: 10px; padding: 15px; margin-bottom: 15px;
-        }
-        .item-label { color: var(--accent-red); font-weight: bold; font-size: 0.85em; display: block; margin-bottom: 8px; text-transform: uppercase; }
+        .tab-btn.active { background: #8b0000; }
+        .content { display: none; }
+        .content.active { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
         
-        input[type="number"] {
-            width: 70%; padding: 10px; border: 1px solid #333; border-radius: 4px;
-            font-size: 1.2em; text-align: center;
+        .left-panel { display: flex; flex-direction: column; gap: 10px; }
+        .item-row { 
+            display: flex; align-items: center; justify-content: space-between; 
+            background: #fff; padding: 10px 15px; border-radius: 8px; border: 1px solid #ddd;
         }
-
-        .results-box { border: 2px dashed var(--accent-red); padding: 15px; margin-top: 15px; background: #fff; }
-        .res-line { display: flex; justify-content: space-between; margin: 5px 0; font-weight: bold; }
+        .item-row label { color: #8b0000; font-weight: bold; font-size: 0.9em; text-transform: uppercase; }
+        .item-row input { width: 60px; padding: 8px; text-align: center; border: 1px solid #333; border-radius: 4px; font-size: 1em; }
         
-        .btn-confirm { width: 100%; padding: 15px; background: var(--accent-brown); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
-        .btn-clear { background: #999; margin-top: 5px; padding: 8px; font-size: 0.8em; }
-        .btn-pdf { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 4px; margin-top: 15px; cursor: pointer; font-weight: bold; }
+        .right-panel { 
+            background: #fff; border: 1px dashed #8b0000; border-radius: 8px; 
+            padding: 15px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .results-box h3 { margin-top: 0; color: #8b0000; font-size: 1.1em; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .res-line { display: flex; justify-content: space-between; margin: 8px 0; font-weight: bold; font-size: 0.9em; }
+        
+        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .btn { 
+            padding: 10px; border: none; border-radius: 4px; font-weight: bold; 
+            cursor: pointer; text-transform: uppercase; font-family: Arial, sans-serif;
+        }
+        .btn-confirm { background: #a0522d; color: white; }
+        .btn-clear { background: #999; color: white; font-size: 0.8em; }
+        .btn-pdf { background: #333; color: white; margin-top: 5px; }
 
-        /* Estilo da Aba Repasse */
-        .info-box { text-align: left; line-height: 1.5; color: #444; padding: 10px; }
-        .info-box b { color: var(--accent-red); }
+        .repasse-text { font-size: 0.9em; color: #444; line-height: 1.4; text-align: left; padding: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <img src="logo.png" class="logo-img" alt="Logo">
-    
     <div class="main-card">
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab(event, 'venda-tab')">Realizar Venda</button>
-            <button class="tab-btn" onclick="switchTab(event, 'repasse-tab')">Repasses</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'venda')">Venda</button>
+            <button class="tab-btn" onclick="switchTab(event, 'repasse')">Repasse</button>
         </div>
 
-        <div id="venda-tab" class="tab-content active">
-            <div class="item-row">
-                <span class="item-label">Elixir da Saciedade (R$ 90)</span>
-                <input type="number" id="qE" value="0" min="0" oninput="calcAuto()">
-            </div>
-            <div class="item-row">
-                <span class="item-label">Ensopado Fortificante (R$ 90)</span>
-                <input type="number" id="qS" value="0" min="0" oninput="calcAuto()">
+        <div id="venda" class="content active">
+            <div class="left-panel">
+                <div class="item-row">
+                    <label>Elixir da Saciedade</label>
+                    <input type="number" id="qE" value="0" min="0" oninput="updateCalc()">
+                </div>
+                <div class="item-row">
+                    <label>Ensopado Fortificante</label>
+                    <input type="number" id="qS" value="0" min="0" oninput="updateCalc()">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-confirm" onclick="confirmarVenda()">Confirmar Venda</button>
+                    <button class="btn btn-clear" onclick="limpar()">Zerar Venda Atual</button>
+                    <button class="btn btn-pdf" onclick="gerarPDF()">📄 Gerar Comprovante (Histórico)</button>
+                </div>
             </div>
 
-            <div class="results-box">
-                <div class="res-line"><span>Bruto:</span> <span id="dB">R$ 0</span></div>
-                <div class="res-line"><span>Taxa (20%):</span> <span id="dR" style="color:red">R$ 0</span></div>
-                <div class="res-line"><span>Líquido:</span> <span id="dL" style="color:green">R$ 0</span></div>
+            <div class="right-panel">
+                <div class="results-box">
+                    <h3>Resultados</h3>
+                    <div class="res-line"><span>Total Bruto:</span> <span id="dB">R$ 0</span></div>
+                    <div class="res-line"><span>Repasse (20%):</span> <span id="dR" style="color:#d9534f">R$ 0</span></div>
+                    <div class="res-line"><span>Total Líquido:</span> <span id="dL" style="color:#2e7d32">R$ 0</span></div>
+                </div>
             </div>
-
-            <button class="btn-confirm" onclick="confirmarVenda()">Confirmar Venda no Histórico</button>
-            <button class="btn-confirm btn-clear" onclick="limparCampos()">Zerar Quantidades</button>
-            <button class="btn-pdf" onclick="gerarPDF()">📄 Baixar Histórico de Turno (PDF)</button>
         </div>
 
-        <div id="repasse-tab" class="tab-content">
-            <div class="info-box">
-                <h3>O que é o Repasse?</h3>
-                <p>O <b>Repasse de 20%</b> é a taxa administrativa devida ao estabelecimento <b>Archavon Cabana</b> por cada item místico vendido.</p>
-                <p><b>Como funciona:</b> Do valor total bruto, o vendedor retém 80% para cobrir custos e lucro pessoal, e entrega 20% ao caixa central do Saloon.</p>
-                <p><i>O histórico do PDF contabiliza todos esses valores para facilitar sua prestação de contas.</i></p>
+        <div id="repasse" class="content">
+            <div class="repasse-text" style="grid-column: span 2;">
+                <h3 style="color:#8b0000">Realizar Venda</h3>
+                <p>Todo vendedor repassa <b>20%</b> de cada venda ao estabelecimento. Este valor refere-se ao custo de ingredientes e manutenção mística do <b>Archavon Cabana Saloon</b>.</p>
+                <p>O lucro líquido (80%) pertence ao vendedor pela prestação do serviço.</p>
             </div>
         </div>
     </div>
@@ -117,86 +108,60 @@
 <script>
     let historico = [];
 
-    // Alternar Abas
     function switchTab(evt, tabId) {
-        let contents = document.getElementsByClassName("tab-content");
-        for (let c of contents) c.classList.remove("active");
-        let btns = document.getElementsByClassName("tab-btn");
-        for (let b of btns) b.classList.remove("active");
-        document.getElementById(tabId).classList.add("active");
-        evt.currentTarget.classList.add("active");
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        evt.currentTarget.classList.add('active');
     }
 
-    // Cálculo em tempo real
-    function calcAuto() {
+    function updateCalc() {
         let e = parseInt(document.getElementById('qE').value) || 0;
         let s = parseInt(document.getElementById('qS').value) || 0;
         let bruto = (e + s) * 90;
-        let repasse = bruto * 0.2;
-        let liquido = bruto - repasse;
+        let rep = bruto * 0.2;
+        let liq = bruto - rep;
 
         document.getElementById('dB').innerText = `R$ ${bruto}`;
-        document.getElementById('dR').innerText = `R$ ${repasse}`;
-        document.getElementById('dL').innerText = `R$ ${liquido}`;
-        return { e, s, bruto, repasse, liquido };
+        document.getElementById('dR').innerText = `R$ ${rep}`;
+        document.getElementById('dL').innerText = `R$ ${liq}`;
+        return { e, s, bruto, rep, liq };
     }
 
-    // Confirmar Venda e salvar no histórico (zera ao fechar o site naturalmente)
     function confirmarVenda() {
-        let dados = calcAuto();
-        if (dados.bruto === 0) {
-            alert("Adicione quantidades antes de confirmar!");
-            return;
-        }
-        historico.push({...dados, hora: new Date().toLocaleTimeString()});
-        alert("Venda registrada! Você pode zerar os campos agora ou continuar somando.");
+        let d = updateCalc();
+        if (d.bruto === 0) return alert("Insira quantidades!");
+        historico.push({...d, data: new Date().toLocaleTimeString()});
+        alert("Venda adicionada ao histórico!");
     }
 
-    function limparCampos() {
+    function limpar() {
         document.getElementById('qE').value = 0;
         document.getElementById('qS').value = 0;
-        calcAuto();
+        updateCalc();
     }
 
-    // Gerar PDF com Arial e Histórico acumulado
     function gerarPDF() {
-        if (historico.length === 0) {
-            alert("Nenhuma venda confirmada no histórico!");
-            return;
-        }
+        if (historico.length === 0) return alert("Sem vendas confirmadas!");
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         let y = 40;
-
         doc.setFont("arial", "bold");
-        doc.text("FECHAMENTO DE CAIXA - ARCHAVON CABANA", 20, 20);
+        doc.text("HISTÓRICO DE TURNO - ARCHAVON CABANA", 20, 20);
         doc.setFontSize(10);
-        doc.text(`Relatório de Turno - Emitido em: ${new Date().toLocaleString()}`, 20, 28);
+        doc.text(`Emitido em: ${new Date().toLocaleString()}`, 20, 28);
         doc.line(20, 32, 190, 32);
 
-        let tBruto = 0, tRepasse = 0;
-
+        let tB = 0, tR = 0;
         historico.forEach((v, i) => {
-            doc.setFont("arial", "bold");
-            doc.text(`VENDA #${i+1} (${v.hora})`, 20, y);
-            doc.setFont("arial", "normal");
-            doc.text(`Itens: ${v.e} Elixir | ${v.s} Ensopado - Subtotal: R$ ${v.bruto}`, 25, y + 7);
-            tBruto += v.bruto;
-            tRepasse += v.repasse;
-            y += 18;
-            if (y > 270) { doc.addPage(); y = 20; }
+            doc.text(`VENDA #${i+1} (${v.data}) - Bruto: R$ ${v.bruto} | Repasse: R$ ${v.rep}`, 20, y);
+            tB += v.bruto; tR += v.rep; y += 10;
         });
-
         doc.line(20, y, 190, y);
-        doc.setFont("arial", "bold");
-        doc.text(`RESUMO FINAL DO TURNO`, 20, y + 10);
-        doc.text(`TOTAL BRUTO: R$ ${tBruto}`, 20, y + 18);
-        doc.setTextColor(200, 0, 0);
-        doc.text(`TOTAL REPASSE (20%): R$ ${tRepasse}`, 20, y + 26);
-
-        doc.save(`turno_archavon_${Date.now()}.pdf`);
+        doc.text(`TOTAL BRUTO ACUMULADO: R$ ${tB}`, 20, y + 10);
+        doc.text(`TOTAL REPASSE DEVIDO: R$ ${tR}`, 20, y + 20);
+        doc.save(`caixa_archavon_${Date.now()}.pdf`);
     }
 </script>
-
 </body>
 </html>
