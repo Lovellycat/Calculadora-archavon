@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archavon Cabana - Calculadora Profissional</title>
+    <title>Archavon Cabana - Sistema de Vendas</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
@@ -18,239 +18,183 @@
         body { 
             font-family: Arial, sans-serif; 
             background-color: var(--bg-body); 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px;
         }
 
-        .container {
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-        }
+        .container { width: 100%; max-width: 450px; text-align: center; }
 
-        /* Logo com relevo/destaque */
         .logo-img {
-            width: 200px;
-            margin-bottom: -30px;
-            position: relative;
-            z-index: 5;
+            width: 220px; margin-bottom: -35px; position: relative; z-index: 5;
             filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6));
         }
 
         .main-card {
-            background: var(--card-main);
-            border-radius: 8px;
-            border: 2px solid var(--accent-red);
-            padding: 40px 20px 20px;
+            background: var(--card-main); border-radius: 8px;
+            border: 2px solid var(--accent-red); padding: 45px 20px 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         /* Abas */
-        .tabs {
-            display: flex;
-            background: #eee;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
+        .tabs { display: flex; margin-bottom: 20px; border-radius: 4px; overflow: hidden; border: 1px solid var(--accent-red); }
         .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: #d2b48c; /* Tom pastel */
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            font-family: Arial, sans-serif;
+            flex: 1; padding: 12px; border: none; background: #eee;
+            color: var(--accent-red); font-weight: bold; cursor: pointer;
+            text-transform: uppercase; font-family: Arial, sans-serif;
         }
+        .tab-btn.active { background: var(--accent-red); color: white; }
 
-        .tab-btn.active { background: var(--accent-red); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        /* Blocos de Alimentos */
+        /* Blocos */
         .item-row {
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            text-align: center;
+            background: #fff; border: 1px solid var(--border-color);
+            border-radius: 10px; padding: 15px; margin-bottom: 15px;
         }
-
-        .item-label {
-            color: var(--accent-red);
-            font-weight: bold;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            display: block;
-            text-transform: uppercase;
-        }
-
+        .item-label { color: var(--accent-red); font-weight: bold; font-size: 0.85em; display: block; margin-bottom: 8px; text-transform: uppercase; }
+        
         input[type="number"] {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #333;
-            border-radius: 4px;
-            font-size: 1.2em;
-            text-align: center;
-            color: var(--text-color);
+            width: 70%; padding: 10px; border: 1px solid #333; border-radius: 4px;
+            font-size: 1.2em; text-align: center;
         }
 
-        /* Resultados */
-        .results-box {
-            border: 2px dashed var(--accent-red);
-            padding: 15px;
-            margin-top: 20px;
-            background: #fff;
-            border-radius: 4px;
-        }
+        .results-box { border: 2px dashed var(--accent-red); padding: 15px; margin-top: 15px; background: #fff; }
+        .res-line { display: flex; justify-content: space-between; margin: 5px 0; font-weight: bold; }
+        
+        .btn-confirm { width: 100%; padding: 15px; background: var(--accent-brown); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
+        .btn-clear { background: #999; margin-top: 5px; padding: 8px; font-size: 0.8em; }
+        .btn-pdf { width: 100%; padding: 12px; background: #333; color: white; border: none; border-radius: 4px; margin-top: 15px; cursor: pointer; font-weight: bold; }
 
-        .res-line {
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            font-size: 1em;
-            font-weight: bold;
-        }
-
-        .val-repasse { color: #d9534f; }
-        .val-liquido { color: #2e7d32; font-size: 1.2em; }
-
-        button.btn-pdf {
-            width: 100%;
-            padding: 12px;
-            background: #444;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            margin-top: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        button.btn-pdf:hover { background: #222; }
-
+        /* Estilo da Aba Repasse */
+        .info-box { text-align: left; line-height: 1.5; color: #444; padding: 10px; }
+        .info-box b { color: var(--accent-red); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <img src="logo.png" class="logo-img" alt="Archavon Cabana Logo">
+    <img src="logo.png" class="logo-img" alt="Logo">
     
     <div class="main-card">
         <div class="tabs">
-            <button class="tab-btn active">Realizar Venda</button>
-            <button class="tab-btn" style="opacity: 0.6; cursor: default;">Repasses</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'venda-tab')">Realizar Venda</button>
+            <button class="tab-btn" onclick="switchTab(event, 'repasse-tab')">Repasses</button>
         </div>
 
-        <div class="item-row">
-            <span class="item-label">Elixir da Saciedade (R$ 90)</span>
-            <input type="number" id="inputE" value="0" min="0" oninput="calcularAutomatico()">
+        <div id="venda-tab" class="tab-content active">
+            <div class="item-row">
+                <span class="item-label">Elixir da Saciedade (R$ 90)</span>
+                <input type="number" id="qE" value="0" min="0" oninput="calcAuto()">
+            </div>
+            <div class="item-row">
+                <span class="item-label">Ensopado Fortificante (R$ 90)</span>
+                <input type="number" id="qS" value="0" min="0" oninput="calcAuto()">
+            </div>
+
+            <div class="results-box">
+                <div class="res-line"><span>Bruto:</span> <span id="dB">R$ 0</span></div>
+                <div class="res-line"><span>Taxa (20%):</span> <span id="dR" style="color:red">R$ 0</span></div>
+                <div class="res-line"><span>Líquido:</span> <span id="dL" style="color:green">R$ 0</span></div>
+            </div>
+
+            <button class="btn-confirm" onclick="confirmarVenda()">Confirmar Venda no Histórico</button>
+            <button class="btn-confirm btn-clear" onclick="limparCampos()">Zerar Quantidades</button>
+            <button class="btn-pdf" onclick="gerarPDF()">📄 Baixar Histórico de Turno (PDF)</button>
         </div>
 
-        <div class="item-row">
-            <span class="item-label">Ensopado Fortificante (R$ 90)</span>
-            <input type="number" id="inputS" value="0" min="0" oninput="calcularAutomatico()">
+        <div id="repasse-tab" class="tab-content">
+            <div class="info-box">
+                <h3>O que é o Repasse?</h3>
+                <p>O <b>Repasse de 20%</b> é a taxa administrativa devida ao estabelecimento <b>Archavon Cabana</b> por cada item místico vendido.</p>
+                <p><b>Como funciona:</b> Do valor total bruto, o vendedor retém 80% para cobrir custos e lucro pessoal, e entrega 20% ao caixa central do Saloon.</p>
+                <p><i>O histórico do PDF contabiliza todos esses valores para facilitar sua prestação de contas.</i></p>
+            </div>
         </div>
-
-        <div class="results-box">
-            <div class="res-line"><span>Total Bruto:</span> <span id="dispBruto">R$ 0</span></div>
-            <div class="res-line"><span>Repasse (20%):</span> <span id="dispRepasse" class="val-repasse">R$ 0</span></div>
-            <div class="res-line"><span>Total Líquido:</span> <span id="dispLiquido" class="val-liquido">R$ 0</span></div>
-        </div>
-
-        <button class="btn-pdf" onclick="registrarEGerar()">
-            📄 Gerar Comprovante (Histórico)
-        </button>
     </div>
 </div>
 
 <script>
-    // Histórico para o PDF
-    let historicoVendas = [];
+    let historico = [];
 
-    function calcularAutomatico() {
-        const preco = 90;
-        const qE = parseInt(document.getElementById('inputE').value) || 0;
-        const qS = parseInt(document.getElementById('inputS').value) || 0;
-
-        const bruto = (qE + qS) * preco;
-        const repasse = bruto * 0.20;
-        const liquido = bruto - repasse;
-
-        document.getElementById('dispBruto').innerText = `R$ ${bruto}`;
-        document.getElementById('dispRepasse').innerText = `R$ ${repasse}`;
-        document.getElementById('dispLiquido').innerText = `R$ ${liquido}`;
-
-        return { qE, qS, bruto, repasse, liquido };
+    // Alternar Abas
+    function switchTab(evt, tabId) {
+        let contents = document.getElementsByClassName("tab-content");
+        for (let c of contents) c.classList.remove("active");
+        let btns = document.getElementsByClassName("tab-btn");
+        for (let b of btns) b.classList.remove("active");
+        document.getElementById(tabId).classList.add("active");
+        evt.currentTarget.classList.add("active");
     }
 
-    function registrarEGerar() {
-        const dados = calcularAutomatico();
-        
-        // Só registra se houver venda
-        if (dados.bruto > 0) {
-            historicoVendas.push({
-                ...dados,
-                data: new Date().toLocaleTimeString()
-            });
-            alert("Venda registrada no histórico do PDF!");
-        }
+    // Cálculo em tempo real
+    function calcAuto() {
+        let e = parseInt(document.getElementById('qE').value) || 0;
+        let s = parseInt(document.getElementById('qS').value) || 0;
+        let bruto = (e + s) * 90;
+        let repasse = bruto * 0.2;
+        let liquido = bruto - repasse;
 
-        if (historicoVendas.length === 0) {
-            alert("Nenhuma venda realizada para gerar histórico.");
+        document.getElementById('dB').innerText = `R$ ${bruto}`;
+        document.getElementById('dR').innerText = `R$ ${repasse}`;
+        document.getElementById('dL').innerText = `R$ ${liquido}`;
+        return { e, s, bruto, repasse, liquido };
+    }
+
+    // Confirmar Venda e salvar no histórico (zera ao fechar o site naturalmente)
+    function confirmarVenda() {
+        let dados = calcAuto();
+        if (dados.bruto === 0) {
+            alert("Adicione quantidades antes de confirmar!");
             return;
         }
-
-        gerarPDF();
+        historico.push({...dados, hora: new Date().toLocaleTimeString()});
+        alert("Venda registrada! Você pode zerar os campos agora ou continuar somando.");
     }
 
+    function limparCampos() {
+        document.getElementById('qE').value = 0;
+        document.getElementById('qS').value = 0;
+        calcAuto();
+    }
+
+    // Gerar PDF com Arial e Histórico acumulado
     function gerarPDF() {
+        if (historico.length === 0) {
+            alert("Nenhuma venda confirmada no histórico!");
+            return;
+        }
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         let y = 40;
 
         doc.setFont("arial", "bold");
-        doc.setFontSize(18);
-        doc.text("HISTÓRICO DE VENDAS - ARCHAVON CABANA", 20, 20);
+        doc.text("FECHAMENTO DE CAIXA - ARCHAVON CABANA", 20, 20);
         doc.setFontSize(10);
-        doc.text(`Relatório gerado em: ${new Date().toLocaleString()}`, 20, 28);
+        doc.text(`Relatório de Turno - Emitido em: ${new Date().toLocaleString()}`, 20, 28);
         doc.line(20, 32, 190, 32);
 
-        let totalGeralBruto = 0;
-        let totalGeralRepasse = 0;
+        let tBruto = 0, tRepasse = 0;
 
-        historicoVendas.forEach((venda, index) => {
+        historico.forEach((v, i) => {
             doc.setFont("arial", "bold");
-            doc.text(`VENDA #${index + 1} - [${venda.data}]`, 20, y);
+            doc.text(`VENDA #${i+1} (${v.hora})`, 20, y);
             doc.setFont("arial", "normal");
-            doc.text(`Itens: ${venda.qE} Elixir | ${venda.qS} Ensopado`, 25, y + 7);
-            doc.text(`Bruto: R$ ${venda.bruto} | Repasse: R$ ${venda.repasse}`, 25, y + 14);
-            
-            totalGeralBruto += venda.bruto;
-            totalGeralRepasse += venda.repasse;
-            y += 25;
-
-            // Criar nova página se ficar muito longo
+            doc.text(`Itens: ${v.e} Elixir | ${v.s} Ensopado - Subtotal: R$ ${v.bruto}`, 25, y + 7);
+            tBruto += v.bruto;
+            tRepasse += v.repasse;
+            y += 18;
             if (y > 270) { doc.addPage(); y = 20; }
         });
 
         doc.line(20, y, 190, y);
         doc.setFont("arial", "bold");
-        doc.text(`RESUMO DO TURNO:`, 20, y + 10);
-        doc.text(`TOTAL BRUTO ACUMULADO: R$ ${totalGeralBruto}`, 20, y + 18);
-        doc.text(`TOTAL REPASSE DEVIDO (20%): R$ ${totalGeralRepasse}`, 20, y + 26);
+        doc.text(`RESUMO FINAL DO TURNO`, 20, y + 10);
+        doc.text(`TOTAL BRUTO: R$ ${tBruto}`, 20, y + 18);
+        doc.setTextColor(200, 0, 0);
+        doc.text(`TOTAL REPASSE (20%): R$ ${tRepasse}`, 20, y + 26);
 
-        doc.save(`historico_caixa_${Date.now()}.pdf`);
+        doc.save(`turno_archavon_${Date.now()}.pdf`);
     }
 </script>
 
