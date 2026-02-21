@@ -89,7 +89,7 @@
                 <div class="btn-group">
                     <button class="btn btn-confirm" onclick="confirmarVenda()">Confirmar Venda</button>
                     <button class="btn btn-clear" onclick="limpar()">Zerar Venda Atual</button>
-                    <button class="btn btn-pdf" onclick="gerarPDF()">📄 Gerar Comprovante (Histórico)</button>
+                    <button class="btn btn-pdf" onclick="gerarPDF()">📄 Gerar Comprovante Detalhado</button>
                 </div>
             </div>
 
@@ -124,10 +124,8 @@
     }
 
     function updateCalc() {
-        // Itens de 90 Solaris
         let e = parseInt(document.getElementById('qE').value) || 0;
         let s = parseInt(document.getElementById('qS').value) || 0;
-        // Itens de 500 Solaris
         let sonhos = parseInt(document.getElementById('qSonhos').value) || 0;
         let limpeza = parseInt(document.getElementById('qLimpeza').value) || 0;
 
@@ -136,7 +134,7 @@
         let liq = bruto - rep;
 
         document.getElementById('dB').innerText = `R$ ${bruto}`;
-        document.getElementById('dR').innerText = `R$ ${rep.toFixed(0)}`; // Arredondado para facilitar
+        document.getElementById('dR').innerText = `R$ ${rep.toFixed(0)}`;
         document.getElementById('dL').innerText = `R$ ${liq.toFixed(0)}`;
         
         return { e, s, sonhos, limpeza, bruto, rep, liq };
@@ -147,6 +145,7 @@
         if (d.bruto === 0) return alert("Insira quantidades!");
         historico.push({...d, data: new Date().toLocaleTimeString()});
         alert("Venda adicionada ao histórico!");
+        limpar(); // Opcional: limpa os campos após confirmar para facilitar a próxima venda
     }
 
     function limpar() {
@@ -162,25 +161,65 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         let y = 40;
-        doc.setFont("arial", "bold");
-        doc.text("HISTÓRICO DE TURNO - ARCHAVON CABANA", 20, 20);
+        
+        // Cabeçalho
+        doc.setFont("courier", "bold");
+        doc.setFontSize(16);
+        doc.text("ARCHAVON CABANA SALOON", 105, 15, { align: "center" });
+        doc.setFontSize(12);
+        doc.text("COMPROVANTE DE VENDAS (FECHAMENTO)", 105, 22, { align: "center" });
+        
         doc.setFontSize(10);
-        doc.text(`Emitido em: ${new Date().toLocaleString()}`, 20, 28);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Data/Hora de Emissão: ${new Date().toLocaleString()}`, 20, 30);
         doc.line(20, 32, 190, 32);
 
-        let tB = 0, tR = 0;
+        let tB = 0, tR = 0, tE = 0, tS = 0, tSon = 0, tLim = 0;
+
+        // Corpo do PDF
         historico.forEach((v, i) => {
-            doc.text(`VENDA #${i+1} (${v.data}) - Bruto: R$ ${v.bruto} | Repasse: R$ ${v.rep.toFixed(0)}`, 20, y);
-            tB += v.bruto; tR += v.rep; y += 10;
+            if (y > 270) { doc.addPage(); y = 20; } // Nova página se estiver cheio
+
+            doc.setFont("helvetica", "bold");
+            doc.text(`VENDA #${i+1} - [${v.data}]`, 20, y);
+            y += 6;
+            
+            doc.setFont("helvetica", "normal");
+            let detalhes = [];
+            if(v.e > 0) { detalhes.push(`${v.e}x Saciedade`); tE += v.e; }
+            if(v.s > 0) { detalhes.push(`${v.s}x Ensopado`); tS += v.s; }
+            if(v.sonhos > 0) { detalhes.push(`${v.sonhos}x Sonhos`); tSon += v.sonhos; }
+            if(v.limpeza > 0) { detalhes.push(`${v.limpeza}x Limpeza`); tLim += v.limpeza; }
+            
+            doc.text(`Itens: ${detalhes.join(", ")}`, 25, y);
+            y += 5;
+            doc.text(`Subtotal: R$ ${v.bruto} | Repasse: R$ ${v.rep.toFixed(0)}`, 25, y);
+            
+            tB += v.bruto; 
+            tR += v.rep; 
+            y += 12;
         });
-        
+
+        // Rodapé com Totais
+        if (y > 230) { doc.addPage(); y = 20; }
         doc.line(20, y, 190, y);
-        doc.setFont("arial", "bold");
-        doc.text(`TOTAL BRUTO ACUMULADO: R$ ${tB}`, 20, y + 10);
-        doc.text(`TOTAL REPASSE DEVIDO (20%): R$ ${tR.toFixed(0)}`, 20, y + 20);
-        doc.text(`TOTAL LÍQUIDO VENDEDOR: R$ ${(tB - tR).toFixed(0)}`, 20, y + 30);
-        
-        doc.save(`caixa_archavon_${Date.now()}.pdf`);
+        y += 10;
+        doc.setFont("helvetica", "bold");
+        doc.text("RESUMO DO TURNO:", 20, y);
+        y += 7;
+        doc.setFont("helvetica", "normal");
+        doc.text(`Total de Produtos: ${tE+tS+tSon+tLim} itens`, 20, y);
+        y += 5;
+        doc.text(`Total Bruto Acumulado: R$ ${tB}`, 20, y);
+        y += 5;
+        doc.setTextColor(150, 0, 0); // Vermelho para o repasse
+        doc.text(`Total Repasse Estabelecimento (20%): R$ ${tR.toFixed(0)}`, 20, y);
+        y += 7;
+        doc.setTextColor(0, 100, 0); // Verde para o lucro
+        doc.setFontSize(12);
+        doc.text(`LUCRO LÍQUIDO VENDEDOR: R$ ${(tB - tR).toFixed(0)}`, 20, y);
+
+        doc.save(`relatorio_caixa_${Date.now()}.pdf`);
     }
 </script>
 </body>
