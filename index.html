@@ -12,7 +12,7 @@
             display: flex; justify-content: center; align-items: center; 
             min-height: 100vh; margin: 0; padding: 20px;
         }
-        .container { width: 100%; max-width: 600px; text-align: center; }
+        .container { width: 100%; max-width: 650px; text-align: center; }
         .logo-img { 
             width: 200px; margin-bottom: -30px; position: relative; z-index: 5;
             filter: drop-shadow(0 8px 10px rgba(0,0,0,0.6));
@@ -29,15 +29,15 @@
         }
         .tab-btn.active { background: #8b0000; }
         .content { display: none; }
-        .content.active { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        .content.active { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; }
         
-        .left-panel { display: flex; flex-direction: column; gap: 10px; }
+        .left-panel { display: flex; flex-direction: column; gap: 8px; }
         .item-row { 
             display: flex; align-items: center; justify-content: space-between; 
-            background: #fff; padding: 10px 15px; border-radius: 8px; border: 1px solid #ddd;
+            background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #ddd;
         }
-        .item-row label { color: #8b0000; font-weight: bold; font-size: 0.9em; text-transform: uppercase; }
-        .item-row input { width: 60px; padding: 8px; text-align: center; border: 1px solid #333; border-radius: 4px; font-size: 1em; }
+        .item-row label { color: #8b0000; font-weight: bold; font-size: 0.85em; text-transform: uppercase; text-align: left; flex: 1; }
+        .item-row input { width: 50px; padding: 6px; text-align: center; border: 1px solid #333; border-radius: 4px; font-size: 1em; }
         
         .right-panel { 
             background: #fff; border: 1px dashed #8b0000; border-radius: 8px; 
@@ -71,12 +71,20 @@
         <div id="venda" class="content active">
             <div class="left-panel">
                 <div class="item-row">
-                    <label>Elixir da Saciedade</label>
+                    <label>Elixir da Saciedade (90)</label>
                     <input type="number" id="qE" value="0" min="0" oninput="updateCalc()">
                 </div>
                 <div class="item-row">
-                    <label>Ensopado Fortificante</label>
+                    <label>Ensopado Fortificante (90)</label>
                     <input type="number" id="qS" value="0" min="0" oninput="updateCalc()">
+                </div>
+                <div class="item-row">
+                    <label>Elixir dos Sonhos (500)</label>
+                    <input type="number" id="qSonhos" value="0" min="0" oninput="updateCalc()">
+                </div>
+                <div class="item-row">
+                    <label>Elixir de Limpeza (500)</label>
+                    <input type="number" id="qLimpeza" value="0" min="0" oninput="updateCalc()">
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-confirm" onclick="confirmarVenda()">Confirmar Venda</button>
@@ -116,16 +124,22 @@
     }
 
     function updateCalc() {
+        // Itens de 90 Solaris
         let e = parseInt(document.getElementById('qE').value) || 0;
         let s = parseInt(document.getElementById('qS').value) || 0;
-        let bruto = (e + s) * 90;
+        // Itens de 500 Solaris
+        let sonhos = parseInt(document.getElementById('qSonhos').value) || 0;
+        let limpeza = parseInt(document.getElementById('qLimpeza').value) || 0;
+
+        let bruto = ((e + s) * 90) + ((sonhos + limpeza) * 500);
         let rep = bruto * 0.2;
         let liq = bruto - rep;
 
         document.getElementById('dB').innerText = `R$ ${bruto}`;
-        document.getElementById('dR').innerText = `R$ ${rep}`;
-        document.getElementById('dL').innerText = `R$ ${liq}`;
-        return { e, s, bruto, rep, liq };
+        document.getElementById('dR').innerText = `R$ ${rep.toFixed(0)}`; // Arredondado para facilitar
+        document.getElementById('dL').innerText = `R$ ${liq.toFixed(0)}`;
+        
+        return { e, s, sonhos, limpeza, bruto, rep, liq };
     }
 
     function confirmarVenda() {
@@ -138,6 +152,8 @@
     function limpar() {
         document.getElementById('qE').value = 0;
         document.getElementById('qS').value = 0;
+        document.getElementById('qSonhos').value = 0;
+        document.getElementById('qLimpeza').value = 0;
         updateCalc();
     }
 
@@ -154,12 +170,16 @@
 
         let tB = 0, tR = 0;
         historico.forEach((v, i) => {
-            doc.text(`VENDA #${i+1} (${v.data}) - Bruto: R$ ${v.bruto} | Repasse: R$ ${v.rep}`, 20, y);
+            doc.text(`VENDA #${i+1} (${v.data}) - Bruto: R$ ${v.bruto} | Repasse: R$ ${v.rep.toFixed(0)}`, 20, y);
             tB += v.bruto; tR += v.rep; y += 10;
         });
+        
         doc.line(20, y, 190, y);
+        doc.setFont("arial", "bold");
         doc.text(`TOTAL BRUTO ACUMULADO: R$ ${tB}`, 20, y + 10);
-        doc.text(`TOTAL REPASSE DEVIDO: R$ ${tR}`, 20, y + 20);
+        doc.text(`TOTAL REPASSE DEVIDO (20%): R$ ${tR.toFixed(0)}`, 20, y + 20);
+        doc.text(`TOTAL LÍQUIDO VENDEDOR: R$ ${(tB - tR).toFixed(0)}`, 20, y + 30);
+        
         doc.save(`caixa_archavon_${Date.now()}.pdf`);
     }
 </script>
